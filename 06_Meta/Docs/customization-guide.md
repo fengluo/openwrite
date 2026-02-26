@@ -84,32 +84,37 @@
 }
 ```
 
-## Claude 命令定制
+## Claude Skills 定制
 
-### 使用向导创建命令 (推荐)
+### 使用向导创建技能 (推荐)
 
-最简单的方法是使用内置的命令生成器：
+最简单的方法是使用内置的 skill 生成器：
 
 ```bash
-npm run create-command
+npm run create-skill
 ```
 
-或者在 Claude 中运行 `/create-command`。向导会引导你完成：
-1. 设置命令名称和描述
+或者在 Claude 中运行 `/create-skill`。向导会引导你完成：
+1. 设置 skill 名称和描述
 2. 定义 Agent 角色和目标
 3. 设计工作流程
 4. 设置行为准则
 
-### 手动创建新命令
+### 手动创建新 Skill
 
-在 `.claude/commands/` 创建 Markdown 文件。
+在 `.claude/skills/` 下创建技能目录，并在目录中创建 `SKILL.md`。
 
-**示例: 创建代码审查命令**
+**示例: 创建代码审查 Skill**
 
-文件: `.claude/commands/code-review.md`
+文件: `.claude/skills/code-review/SKILL.md`
 
 ```markdown
-# Code Review - 代码审查
+---
+name: code-review
+description: Review code quality, security, and maintainability
+---
+
+# Code Review - 代码审查 Skill
 
 你是一个专业的代码审查员。
 
@@ -149,9 +154,9 @@ npm run create-command
 
 使用: 在 Claude Code 中运行 `/code-review`
 
-### 修改现有命令
+### 修改现有 Skill
 
-编辑 `.claude/commands/` 下的文件。
+编辑 `.claude/skills/` 下的文件。
 
 **示例: 修改 thinking-partner**
 
@@ -167,7 +172,7 @@ npm run create-command
 
 ## AI Agents 定制
 
-除了命令，你还可以定制 AI Agent 的角色定义（Persona）。这些定义位于 `06_Meta/Agents/`。
+除了 skills，你还可以定制 AI Agent 的角色定义（Persona）。这些定义位于 `06_Meta/Agents/`。
 
 ### 修改现有 Agent
 
@@ -486,11 +491,11 @@ claude /quick-capture
 
 **学术研究者**:
 - 在 03_Resources/ 添加 Papers/ 子文件夹
-- 创建 citation 管理命令
+- 创建 citation 管理 skill
 - 添加文献笔记模板
 
 **软件开发者**:
-- 创建 code-snippet 管理命令
+- 创建 code-snippet 管理 skill
 - 添加 bug-tracking 模板
 - 集成 GitHub Issues
 
@@ -501,7 +506,7 @@ claude /quick-capture
 
 ### 团队使用
 
-**共享模板和命令**:
+**共享模板和 skills**:
 
 1. 团队共享仓库
 2. 个人 fork 并定制

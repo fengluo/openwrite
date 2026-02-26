@@ -25,7 +25,7 @@
 - **结构化知识管理**: 采用改良的 PARA 方法组织内容
 - **智能辅助创作**: 利用 Claude Code 提供上下文感知的 AI 助手
 - **版本控制**: 基于 Git 追踪知识演变
-- **可扩展性**: 支持自定义命令、工作流和集成
+- **可扩展性**: 支持自定义技能、工作流和集成
 
 ### 与 Claudesidian 的对比
 
@@ -34,11 +34,21 @@
 | 核心编辑器 | Obsidian | VSCode |
 | 文件格式 | Markdown | Markdown + 多格式支持 |
 | 扩展性 | Obsidian 插件 | VSCode 扩展 + 任务自动化 |
-| AI 集成 | Claude Code CLI | Claude Code CLI + Tasks |
+| AI 集成 | Claude Code CLI + Commands + Skills + Hooks | Claude Code CLI + Commands + Skills + VSCode Tasks |
 | 版本控制 | Git (需配置) | 原生 Git 集成 |
 | 代码支持 | 基础 | 专业级代码编辑 |
 | 可视化 | 图谱视图 | 文件树 + 自定义视图 |
 | 移动访问 | SSH 远程 | SSH 远程 + Code Server |
+
+### Claudesidian 最新更新对齐 (截至 2026-02-24)
+
+已确认 Claudesidian 最新稳定版为 `v0.14.2` (2026-01-13),对本方案影响最大的更新如下:
+
+1. `v0.14.0`: 引入 `.claude/skills/` 技能体系 + `skill-discovery` 自动发现 hook + `/pragmatic-review` 命令
+2. `v0.14.1`: 修复跨 shell 兼容问题(`/upgrade` 中避免脆弱 `sed`)与 CJK 文件名保留
+3. `v0.14.2`: 依赖安全升级与许可证归属完善(供应链治理)
+
+本方案后续设计将按以上三点对齐。
 
 ### 适用人群
 
@@ -103,7 +113,7 @@
                     │
 ┌─────────────────────────────────────────┐
 │           AI 集成层                       │
-│   Claude Code CLI + Custom Commands     │
+│ Claude Code CLI + Commands + Skills/Hooks │
 └─────────────────────────────────────────┘
                     │
 ┌─────────────────────────────────────────┐
@@ -138,19 +148,29 @@
 **架构**:
 ```
 .claude/
-├── commands/          # 自定义命令定义
-│   ├── thinking-partner.md
-│   ├── research-assistant.md
-│   ├── inbox-processor.md
-│   ├── daily-review.md
-│   ├── weekly-synthesis.md
-│   ├── de-ai-ify.md
-│   └── custom-*.md
-├── agents/            # 专门化 Agent 指令
-│   ├── writer.md
-│   ├── researcher.md
-│   └── editor.md
-└── config.json        # 配置文件
+├── skills/            # Claude skills（可通过 / 调用，目录内为 SKILL.md）
+│   ├── thinking-partner/
+│   │   └── SKILL.md
+│   ├── research-assistant/
+│   │   └── SKILL.md
+│   ├── inbox-processor/
+│   │   └── SKILL.md
+│   ├── daily-review/
+│   │   └── SKILL.md
+│   ├── weekly-synthesis/
+│   │   └── SKILL.md
+│   ├── draft-content/
+│   │   └── SKILL.md
+│   ├── de-ai-ify/
+│   │   └── SKILL.md
+│   ├── create-skill/
+│   │   └── SKILL.md
+│   └── pragmatic-review/
+│       └── SKILL.md
+├── hooks/             # 提交用户请求前后的自动钩子
+│   └── skill-discovery.sh
+├── settings.json      # Claude hooks/tool 配置
+└── claude_config.json # 项目级 Claude 配置
 ```
 
 #### 3. 自动化脚本
@@ -231,7 +251,7 @@
 ✓ git init
 ✓ 首次提交: "Initial workspace setup"
 
-初始化完成! 输入 `/help` 查看可用命令。
+初始化完成! 输入 `/help` 查看可用 skills。
 ```
 
 ### 模块 2: 双模式工作流
@@ -450,35 +470,40 @@ AI: 分析过去 7 天的笔记...
 
 **功能特点**:
 - 仅更新系统文件(`.claude/`, `scripts/`, `06_Meta/Templates/`)
-- 从不触碰用户内容(00-04 文件夹)
-- 显示文件差异
-- 创建时间戳备份
-- 可暂停和恢复
+- 从不触碰用户内容(`00_Inbox`~`04_Archive`、`05_Attachments`)
+- 先展示 `diff`,再让用户确认是否应用
+- 创建时间戳备份 + 升级清单(`.upgrade-checklist.md`)
+- 支持中断后恢复执行
+- 跨 shell 兼容(Bash/Zsh/Fish),避免脆弱命令组合
 
 **工作流程**:
 ```
-User: /upgrade
+User: /upgrade check
 
 AI: 检查更新...
 发现新版本 v2.1.0,包含以下改进:
 
-系统文件更新:
-[1] .claude/commands/thinking-partner.md
+系统文件差异:
+[1] .claude/skills/thinking-partner/SKILL.md
     - 新增:支持多轮对话记忆
-    - 查看差异 [D] | 应用 [Y] | 跳过 [N]
+    - 先显示 unified diff,再选择 [应用/跳过/合并]
 
 [2] scripts/attachment-manager.js
     - 新增:自动压缩大图片
-    - 查看差异 [D] | 应用 [Y] | 跳过 [N]
+    - 先显示 unified diff,再选择 [应用/跳过/合并]
 
 新增文件:
-[3] .claude/commands/code-reviewer.md
-    - 代码审查助手(新功能)
-    - 应用 [Y] | 跳过 [N]
+[3] .claude/skills/pragmatic-review/SKILL.md
+    - 实用代码审查助手(新功能)
+    - 选择 [应用/跳过]
 
 备份位置: .backup/upgrade-2024-01-10-143025/
+进度清单: .upgrade-checklist.md
 
 是否继续? [Y/n]
+
+User: /upgrade
+AI: 进入交互式逐文件升级模式(可中断恢复)...
 ```
 
 ### 模块 6: 视觉与文档分析 (可选)
@@ -634,25 +659,25 @@ npm run git:sync-check       # 检查未同步的更改
 npm run git:auto-sync        # 自动拉取并推送
 ```
 
-### 模块 9: 自定义命令创建器
+### 模块 9: 自定义技能创建器
 
 **目标**: 用户可以创建专属 AI 助手。
 
-**命令**: `/create-command`
+**命令**: `/create-skill`
 
 **示例对话**:
 ```
-User: /create-command
+User: /create-skill
 
-AI: 让我帮你创建自定义命令。
+AI: 让我帮你创建自定义技能。
 
-命令名称 (例如: "blog-publisher"):
+技能名称 (例如: "blog-publisher"):
 User: social-media-adapter
 
-这个命令的作用是?
+这个技能的作用是?
 User: 将长文章改写为社交媒体帖子(Twitter/小红书)
 
-AI: 好的,这个命令将:
+AI: 好的,这个技能将:
 - 读取现有文章
 - 提取核心观点
 - 改写为社交媒体格式
@@ -666,14 +691,32 @@ AI: 好的,这个命令将:
 
 User: 4
 
-AI: 正在生成命令定义...
+AI: 正在生成 skill 定义...
 
-✓ 创建 .claude/commands/social-media-adapter.md
+✓ 创建 .claude/skills/social-media-adapter/SKILL.md
 ✓ 创建示例模板 06_Meta/Templates/social-post.md
 
-你现在可以使用 `/social-media-adapter` 命令了!
+你现在可以使用 `/social-media-adapter` skill 了!
 
 是否现在测试? [Y/n]
+```
+
+### 模块 10: 实用代码审查 (可选)
+
+**目标**: 用低噪声方式识别过度设计、潜在风险和测试缺口。
+
+**命令**: `/pragmatic-review`
+
+**模式设计**:
+- 默认模式: 快速 YAGNI/KISS 审查(适合日常改动)
+- 深度模式: `--deep` 六轮审查(安全/架构/逻辑/性能/简化/可维护性)
+- CI 模式: `--ci` 非交互输出(用于 GitHub Actions)
+
+**示例**:
+```bash
+/pragmatic-review
+/pragmatic-review --deep --base main
+/pragmatic-review --ci
 ```
 
 ---
@@ -732,22 +775,33 @@ vscode-claude-workspace/
 │   ├── Insights/                # 洞察日志
 │   └── Docs/                    # 系统文档
 │       ├── getting-started.md
-│       ├── commands-reference.md
+│       ├── skills-reference.md
 │       └── customization-guide.md
 │
 ├── .claude/                     # Claude Code 配置
-│   ├── commands/                # 自定义命令
-│   │   ├── thinking-partner.md
-│   │   ├── research-assistant.md
-│   │   ├── inbox-processor.md
-│   │   ├── daily-review.md
-│   │   ├── weekly-synthesis.md
-│   │   ├── draft-content.md
-│   │   ├── de-ai-ify.md
-│   │   ├── smart-commit.md
-│   │   ├── create-command.md
-│   │   └── upgrade.md
-│   └── config.json              # Claude 配置
+│   ├── skills/                  # Claude skills（目录式）
+│   │   ├── thinking-partner/
+│   │   │   └── SKILL.md
+│   │   ├── research-assistant/
+│   │   │   └── SKILL.md
+│   │   ├── inbox-processor/
+│   │   │   └── SKILL.md
+│   │   ├── daily-review/
+│   │   │   └── SKILL.md
+│   │   ├── weekly-synthesis/
+│   │   │   └── SKILL.md
+│   │   ├── draft-content/
+│   │   │   └── SKILL.md
+│   │   ├── de-ai-ify/
+│   │   │   └── SKILL.md
+│   │   ├── create-skill/
+│   │   │   └── SKILL.md
+│   │   └── upgrade/
+│   │       └── SKILL.md
+│   ├── hooks/
+│   │   └── skill-discovery.sh
+│   ├── settings.json            # hooks/tool 配置
+│   └── claude_config.json       # 项目级配置
 │
 ├── .vscode/                     # VSCode 配置
 │   ├── settings.json            # 工作区设置
@@ -894,6 +948,8 @@ vscode-claude-workspace/
   "description": "AI-powered content creation workspace",
   "scripts": {
     "init": "node scripts/setup/init-workspace.js",
+    "check-updates": "node scripts/setup/check-updates.js",
+    "security:audit": "npm audit --audit-level=moderate",
     "file:organize": "node scripts/file-management/organize-attachments.js",
     "file:orphans": "node scripts/file-management/find-orphans.js",
     "file:compress": "node scripts/file-management/compress-images.js",
@@ -907,6 +963,7 @@ vscode-claude-workspace/
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.20.0",
+    "@modelcontextprotocol/sdk": "^1.25.2",
     "gray-matter": "^4.0.3",
     "markdown-it": "^14.0.0",
     "node-fetch": "^3.3.0",
@@ -931,7 +988,7 @@ vscode-claude-workspace/
 1. 创建项目结构模板
 2. 编写初始化脚本 (`init-workspace.js`)
 3. 配置 VSCode 设置和推荐扩展
-4. 实现核心 Claude 命令:
+4. 实现核心 Claude Skills:
    - `/thinking-partner`
    - `/quick-capture`
    - `/inbox-processor`
@@ -964,14 +1021,16 @@ vscode-claude-workspace/
 
 **任务**:
 1. 实现定期回顾 (`/daily-review`, `/weekly-synthesis`)
-2. 开发自定义命令创建器 (`/create-command`)
-3. 实现智能升级系统 (`/upgrade`)
-4. 集成 Gemini Vision (可选)
-5. 集成 Firecrawl (可选)
+2. 开发自定义技能创建器 (`/create-skill`)
+3. 实现智能升级系统 (`/upgrade check|force`)
+4. 引入技能系统 (`.claude/skills/`) 与自动发现 hook
+5. 增加实用代码审查命令 (`/pragmatic-review`)
+6. 集成 Gemini Vision (可选)
+7. 集成 Firecrawl (可选)
 
 **交付物**:
 - 反思和综合工具
-- 可扩展的命令系统
+- 可扩展的 skills 系统
 - 安全的升级机制
 
 ### 阶段 4: 优化和文档 (Week 7-8)
@@ -981,9 +1040,11 @@ vscode-claude-workspace/
 **任务**:
 1. 性能优化 (大工作区支持)
 2. 错误处理和异常恢复
-3. 编写详细的使用指南
-4. 创建视频教程
-5. 建立社区贡献指南
+3. 安全基线(依赖漏洞扫描、许可证归属、供应链检查)
+4. 脚本跨 shell 兼容验证(Bash/Zsh/Fish)
+5. 编写详细的使用指南
+6. 创建视频教程
+7. 建立社区贡献指南
 
 **交付物**:
 - 稳定的 v1.0.0 版本
@@ -997,7 +1058,7 @@ vscode-claude-workspace/
 **任务**:
 1. 收集用户反馈
 2. 建立 Issue 追踪
-3. 开发额外的命令和 Agent
+3. 开发额外的 Skills
 4. 创建 VSCode 扩展 (可选)
 5. 集成更多 MCP Servers
 
@@ -1362,7 +1423,7 @@ lastReviewed: 2024-01-10
 1. **本地优先**: 完全控制数据,无厂商锁定
 2. **AI 增强思考**: 不只是自动化,更是智能协作
 3. **专业代码支持**: VSCode 强大的编辑能力
-4. **灵活扩展**: 自定义命令 + VSCode 扩展生态
+4. **灵活扩展**: 自定义技能 + VSCode 扩展生态
 5. **版本控制**: Git 原生集成,追踪知识演变
 6. **跨平台**: Windows/Mac/Linux + 远程访问
 
@@ -1384,10 +1445,10 @@ lastReviewed: 2024-01-10
 ### 下一步行动
 
 1. **立即开始**: 克隆模板仓库,运行 `/init-workspace`
-2. **熟悉命令**: 尝试每个核心命令,找到适合自己的工作流
+2. **熟悉 skills**: 尝试每个核心 skill,找到适合自己的工作流
 3. **定制配置**: 编辑 `CLAUDE.md`,让 AI 了解你的偏好
 4. **建立习惯**: 每天使用 `/daily-review`,每周使用 `/weekly-synthesis`
-5. **持续迭代**: 创建自定义命令,优化个人工作流
+5. **持续迭代**: 创建自定义技能,优化个人工作流
 
 ---
 

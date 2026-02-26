@@ -21,7 +21,7 @@ This is a **Claude Write** workspace, designed for AI-assisted content creation 
 - `05_Attachments/`: Images, PDFs, and other binary files
 - `06_Meta/`: Templates, documentation, and system files
 
-## Commands
+## Skills
 - `/thinking-partner`: Explore ideas and connect concepts
 - `/quick-capture`: Rapidly save thoughts to Inbox
 - `/inbox-processor`: Organize and triage Inbox items
@@ -46,4 +46,4 @@ This is a **Claude Write** workspace, designed for AI-assisted content creation 
 
 ## Development
 - Use `npm run` to execute automation scripts
-- Check `.claude/commands/` for custom command definitions
+- Check `.claude/skills/` for custom skill definitions

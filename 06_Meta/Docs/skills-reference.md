@@ -1,8 +1,8 @@
-# Claude 命令参考
+# Claude Skills 参考
 
-完整的 Claude 命令使用指南。
+完整的 Claude Skills 使用指南。
 
-## 命令列表
+## Skills 列表
 
 - [/thinking-partner](#thinking-partner) - 思考伙伴模式
 - [/quick-capture](#quick-capture) - 快速捕获
@@ -11,7 +11,7 @@
 - [/daily-review](#daily-review) - 每日回顾
 - [/weekly-synthesis](#weekly-synthesis) - 每周综合
 - [/upgrade](#upgrade) - 系统升级
-- [/create-command](#create-command) - 创建命令
+- [/create-skill](#create-skill) - 创建技能
 
 ---
 
@@ -90,7 +90,7 @@ AI: 让我先搜索你工作区中关于 API 的内容...
 
 ### 工作流程
 
-1. 运行命令
+1. 运行 skill
 2. 输入想法（可以是不完整的）
 3. AI 自动分类并添加标签
 4. 文件创建在 00_Inbox/
@@ -651,11 +651,11 @@ npm run upgrade
 
 ---
 
-## /create-command
+## /create-skill
 
 ### 用途
 
-交互式向导，帮助用户创建符合规范的自定义 Claude 命令。
+交互式向导，帮助用户创建符合规范的自定义 Claude Skills。
 
 ### 何时使用
 
@@ -664,16 +664,16 @@ npm run upgrade
 
 ### 工作流程
 
-1. 收集命令元数据（名称、描述、用途）
+1. 收集 skill 元数据（名称、描述、用途）
 2. 定义角色与目标
 3. 构建工作流程步骤
 4. 设置行为准则
-5. 自动生成 Markdown 命令文件
+5. 自动生成 skill 目录与 `SKILL.md`
 
 ### 示例
 
 ```bash
-npm run create-command
+npm run create-skill
 ```
 
 ---
@@ -718,17 +718,17 @@ npm run create-command
 提取可复用知识到 Resources
 ```
 
-## 自定义命令
+## 自定义技能
 
-你可以在 `.claude/commands/` 创建自己的命令。
+你可以在 `.claude/skills/` 创建自己的 skills。
 
-参考现有命令的格式，创建 Markdown 文件即可。
+参考现有 skill 的格式，创建目录并添加 `SKILL.md` 即可。
 
 ---
 
 ## 自动化脚本 (npm scripts)
 
-除了 Claude 命令，系统还提供了一系列自动化脚本，通过 `npm run` 执行。
+除了 Claude Skills，系统还提供了一系列自动化脚本，通过 `npm run` 执行。
 
 ### 查看帮助
 
@@ -946,9 +946,9 @@ npm run web:batch -- urls.txt --report
 
 ---
 
-## 脚本命令速查表
+## 脚本速查表
 
-| 命令 | 用途 | 常用选项 |
+| 脚本 | 用途 | 常用选项 |
 |------|------|----------|
 | `npm run help` | 显示帮助 | - |
 | `npm run init` | 初始化工作区 | - |
@@ -966,4 +966,4 @@ npm run web:batch -- urls.txt --report
 
 ---
 
-**记住**: 这些命令是工具，不是规则。根据你的需求灵活使用！
+**记住**: 这些脚本是工具，不是规则。根据你的需求灵活使用！
