@@ -248,7 +248,7 @@ function ensureFolderStructure() {
     'scripts/stats',
     'scripts/file-management',
     'scripts/utils',
-    '.claude/commands'
+    '.claude/skills'
   ];
 
   let created = 0;
@@ -291,9 +291,9 @@ status: unprocessed
 
 ## 快速开始
 
-1. 使用 \`/quick-capture\` 命令快速捕获想法
-2. 使用 \`/thinking-partner\` 命令探索主题
-3. 使用 \`/inbox-processor\` 命令整理收件箱
+1. 使用 \`/quick-capture\` skill 快速捕获想法
+2. 使用 \`/thinking-partner\` skill 探索主题
+3. 使用 \`/inbox-processor\` skill 整理收件箱
 
 ## 建立连接
 
@@ -539,9 +539,9 @@ function showCompletion(config, env) {
 
   print('\n4. 阅读文档', 'cyan');
   print('   06_Meta/Docs/getting-started.md', 'yellow');
-  print('   06_Meta/Docs/commands-reference.md', 'yellow');
+  print('   06_Meta/Docs/skills-reference.md', 'yellow');
 
-  print('\n📖 可用的 Claude 命令', 'bright');
+  print('\n📖 可用的 Claude Skills（可通过 `/` 调用）', 'bright');
   print('─'.repeat(60), 'blue');
   print('   /quick-capture      - 快速捕获想法', 'cyan');
   print('   /thinking-partner   - 思考探索模式', 'cyan');

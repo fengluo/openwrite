@@ -1,3 +1,8 @@
+---
+name: inbox-processor
+description: 分析并整理收件箱内容到合适目录
+---
+
 # Inbox Processor - 收件箱处理器
 
 智能分析收件箱内容，提供整理建议，帮助定期清空收件箱。

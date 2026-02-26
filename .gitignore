@@ -60,3 +60,8 @@ logs/
 *.iml
 *.sublime-project
 *.sublime-workspace
+
+03_Resources/**/*.md
+05_Attachments/**/*.jpg
+05_Attachments/**/*.png
+05_Attachments/**/*.mp4

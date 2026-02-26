@@ -1,3 +1,8 @@
+---
+name: quick-capture
+description: 快速零摩擦捕获想法到收件箱并添加元数据
+---
+
 # Quick Capture - 快速捕获
 
 快速、零摩擦地捕获想法、灵感或待办事项到收件箱。

@@ -55,6 +55,7 @@
     "RESEARCH",
     "QUESTION"
   ],
+  "todo-tree.regex.regex": "((//|#|<!--|/\\*|^)\\s*($TAGS)|^\\s*- \\[ \\])",
   "todo-tree.highlights.defaultHighlight": {
     "icon": "check",
     "type": "text-and-comment"
@@ -67,5 +68,7 @@
   "files.associations": {
     "*.md": "markdown"
   },
-  "files.defaultLanguage": "markdown"
+  "files.defaultLanguage": "markdown",
+  "todo-tree.tree.scanMode": "workspace only",
+  "todo-tree.tree.showBadges": false
 }

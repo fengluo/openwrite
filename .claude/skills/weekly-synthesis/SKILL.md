@@ -1,3 +1,8 @@
+---
+name: weekly-synthesis
+description: 进行周度综合回顾并规划下周
+---
+
 # Weekly Synthesis - 每周综合
 
 每周进行一次深度回顾，整合本周进展，提炼洞察，并为下周制定战略计划。

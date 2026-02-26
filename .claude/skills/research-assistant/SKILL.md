@@ -1,3 +1,8 @@
+---
+name: research-assistant
+description: 整合内外部资料进行结构化研究
+---
+
 # Research Assistant - 研究助手
 
 深入研究主题，整合内外部资料，生成结构化大纲。

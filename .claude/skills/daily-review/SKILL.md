@@ -1,3 +1,8 @@
+---
+name: daily-review
+description: 统计当日活动并引导反思复盘
+---
+
 # Daily Review - 每日回顾
 
 自动统计当天活动，引导反思，记录进展和洞察。

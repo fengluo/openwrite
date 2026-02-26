@@ -1,3 +1,8 @@
+---
+name: de-ai-ify
+description: 移除文本AI痕迹并保留原意
+---
+
 # De-AI-ify - 去 AI 化
 
 移除文本中的"AI 味"，使其更具个人风格、更自然、更真实。

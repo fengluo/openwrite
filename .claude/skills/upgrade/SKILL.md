@@ -1,3 +1,8 @@
+---
+name: upgrade
+description: 检查并执行系统升级，优先保护用户数据
+---
+
 # Upgrade System - 系统升级
 
 智能检查并应用 Claude Write 的系统更新。

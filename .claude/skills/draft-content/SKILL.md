@@ -1,3 +1,8 @@
+---
+name: draft-content
+description: 基于大纲与笔记生成结构化初稿
+---
+
 # Draft Content - 初稿生成
 
 根据大纲或笔记快速生成文章初稿。
