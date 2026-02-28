@@ -102,11 +102,11 @@ npm run create-skill
 
 ### 手动创建新 Skill
 
-在 `.claude/skills/` 下创建技能目录，并在目录中创建 `SKILL.md`。
+在 `06_Meta/skills/` 下创建技能目录，并在目录中创建 `SKILL.md`。
 
 **示例: 创建代码审查 Skill**
 
-文件: `.claude/skills/code-review/SKILL.md`
+文件: `06_Meta/skills/code-review/SKILL.md`
 
 ```markdown
 ---
@@ -156,7 +156,7 @@ description: Review code quality, security, and maintainability
 
 ### 修改现有 Skill
 
-编辑 `.claude/skills/` 下的文件。
+编辑 `06_Meta/skills/` 下的文件。
 
 **示例: 修改 thinking-partner**
 

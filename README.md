@@ -393,7 +393,7 @@ npm run web:batch -- urls.txt                       # 批量保存 URL 列表
 
 ### 创建自定义 Claude Skills
 
-在 `.claude/skills/<skill-name>/` 下创建 `SKILL.md`:
+在 `06_Meta/skills/<skill-name>/` 下创建 `SKILL.md`:
 
 ```markdown
 ---
@@ -519,7 +519,7 @@ git commit -m "Complete: [项目名称]"
 - 检查网络连接
 
 ### Claude Skills 无法识别
-- 确保文件位于 `.claude/skills/` 目录
+- 确保文件位于 `06_Meta/skills/` 目录（并已映射到 `.claude/skills`）
 - 检查技能文件名为 `SKILL.md`
 - 重启 Claude Code
 

@@ -1,17 +1,17 @@
 const cron = require('node-cron');
 const notifier = require('node-notifier');
 const path = require('path');
-const fs = require('fs');
 const { exec } = require('child_process');
+const { loadWorkspaceConfig } = require('../utils/agent-config');
 
-// Load Configuration
-const CONFIG_PATH = path.resolve(__dirname, '../../.claude/config.json');
+// Load configuration from centralized workspace config with legacy fallback.
+const workspaceRoot = path.resolve(__dirname, '../..');
 let config = {};
-
+let configSource = 'defaults';
 try {
-  if (fs.existsSync(CONFIG_PATH)) {
-    config = JSON.parse(fs.readFileSync(CONFIG_PATH, 'utf8'));
-  }
+  const loaded = loadWorkspaceConfig({ cwd: workspaceRoot });
+  config = loaded.config;
+  configSource = loaded.sourcePath;
 } catch (error) {
   console.error('Error loading config:', error.message);
 }
@@ -30,6 +30,7 @@ const FEATURES = config.features || {
 
 console.log('⏰ Claude Write Scheduler Started');
 console.log('================================');
+console.log(`Config source: ${configSource}`);
 
 // Helper to send notification
 function notify(title, message, wait = false) {
