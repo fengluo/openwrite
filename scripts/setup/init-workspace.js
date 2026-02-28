@@ -4,6 +4,11 @@ const fs = require('fs');
 const path = require('path');
 const { execSync } = require('child_process');
 const readline = require('readline');
+const {
+  loadWorkspaceConfig,
+  saveWorkspaceConfig,
+  applyAgentMode
+} = require('../utils/agent-config');
 
 // 颜色输出
 const colors = {
@@ -98,6 +103,12 @@ async function checkEnvironment() {
       command: 'claude',
       version: () => getVersion('claude', '--version'),
       required: false
+    },
+    {
+      name: 'Codex CLI',
+      command: 'codex',
+      version: () => getVersion('codex', '--version'),
+      required: false
     }
   ];
 
@@ -190,7 +201,8 @@ async function collectUserPreferences(stats) {
   print('  5. 混合使用');
 
   const purpose = await question('请选择 (1-5，默认 5):');
-  config.purpose = ['pkm', 'project', 'writing', 'learning', 'mixed'][parseInt(purpose || '5') - 1];
+  const purposeOptions = ['pkm', 'project', 'writing', 'learning', 'mixed'];
+  config.purpose = purposeOptions[parseInt(purpose || '5', 10) - 1] || 'mixed';
 
   // 语言偏好
   print('\n您主要使用什么语言写作？', 'cyan');
@@ -199,7 +211,19 @@ async function collectUserPreferences(stats) {
   print('  3. 双语');
 
   const lang = await question('请选择 (1-3，默认 3):');
-  config.language = ['zh', 'en', 'both'][parseInt(lang || '3') - 1];
+  const langOptions = ['zh', 'en', 'both'];
+  config.language = langOptions[parseInt(lang || '3', 10) - 1] || 'both';
+
+  // Agent 模式
+  print('\n你希望启用哪个 Agent 适配？', 'cyan');
+  print('  1. Codex');
+  print('  2. Claude');
+  print('  3. Both (默认)');
+  print('  4. None (仅保留中立配置)');
+
+  const agentModeInput = await question('请选择 (1-4，默认 3):');
+  const agentModeOptions = ['codex', 'claude', 'both', 'none'];
+  config.agentMode = agentModeOptions[parseInt(agentModeInput || '3', 10) - 1] || 'both';
 
   // Git 初始化
   if (!fs.existsSync(path.join(process.cwd(), '.git'))) {
@@ -243,12 +267,13 @@ function ensureFolderStructure() {
     '06_Meta/Reviews/daily',
     '06_Meta/Reviews/weekly',
     '06_Meta/Reviews/monthly',
+    '06_Meta/config',
+    '06_Meta/skills',
     '06_Meta/Docs',
     'scripts/setup',
     'scripts/stats',
     'scripts/file-management',
-    'scripts/utils',
-    '.claude/skills'
+    'scripts/utils'
   ];
 
   let created = 0;
@@ -472,6 +497,58 @@ ${config.language === 'zh' ? '6. **语言** - 使用中文交流\n' : ''}${confi
   print(`  ✓ 创建 CLAUDE.md`, 'green');
 }
 
+function generateManagedConfig(config) {
+  print('\n⚙️  写入中立配置中心', 'bright');
+  print('─'.repeat(60), 'blue');
+
+  const langMap = {
+    zh: 'zh-CN',
+    en: 'en-US',
+    both: 'both'
+  };
+
+  const loaded = loadWorkspaceConfig({ cwd: process.cwd() });
+  const nextConfig = {
+    ...loaded.config,
+    system: {
+      ...loaded.config.system,
+      language: langMap[config.language] || loaded.config.system.language
+    },
+    workspace: {
+      ...(loaded.config.workspace || {}),
+      purpose: config.purpose
+    }
+  };
+
+  const centralPath = saveWorkspaceConfig(nextConfig, { cwd: process.cwd() });
+  print(`  ✓ 更新 ${path.relative(process.cwd(), centralPath)}`, 'green');
+
+  const applied = applyAgentMode(config.agentMode, {
+    cwd: process.cwd(),
+    syncLegacyClaudeConfig: true
+  });
+
+  applied.effects
+    .filter(effect => effect.path !== centralPath)
+    .forEach(effect => {
+      const relative = path.relative(process.cwd(), effect.path);
+      let marker = '写入';
+      if (effect.action === 'remove' || effect.action === 'remove_link') marker = '移除';
+      if (effect.action === 'link') marker = '链接';
+      if (effect.action === 'copy') marker = '复制';
+      if (effect.action === 'skip_existing') marker = '保留现有';
+      if (effect.action === 'keep' || effect.action === 'keep_existing') marker = '保持';
+      if (effect.action === 'seed') marker = '同步初始技能';
+
+      if (effect.action === 'seed' && effect.from) {
+        const from = path.relative(process.cwd(), effect.from);
+        print(`  ✓ ${marker} ${relative} (from ${from})`, 'cyan');
+      } else {
+        print(`  ✓ ${marker} ${relative}`, 'cyan');
+      }
+    });
+}
+
 // 安装依赖
 async function installDependencies() {
   print('\n📦 安装依赖', 'bright');
@@ -519,6 +596,7 @@ function showCompletion(config, env) {
 
   print('\n📚 下一步建议', 'bright');
   print('─'.repeat(60), 'blue');
+  print(`\n当前 Agent 模式: ${config.agentMode}`, 'cyan');
 
   print('\n1. 启动 VSCode', 'cyan');
   if (env.code) {
@@ -531,10 +609,14 @@ function showCompletion(config, env) {
   print('   VSCode 会提示安装工作区推荐的扩展', 'yellow');
 
   print('\n3. 创建第一条笔记', 'cyan');
-  if (env.claude) {
+  if ((config.agentMode === 'codex' || config.agentMode === 'both') && env.codex) {
+    print('   运行: codex (然后输入 /quick-capture)', 'yellow');
+  } else if ((config.agentMode === 'claude' || config.agentMode === 'both') && env.claude) {
     print('   运行: claude /quick-capture', 'yellow');
+  } else if (config.agentMode === 'none') {
+    print('   使用你偏好的 AI 客户端运行 /quick-capture', 'yellow');
   } else {
-    print('   在 VSCode 中使用 Claude Code 扩展', 'yellow');
+    print('   在你选择的 AI 客户端中运行 /quick-capture', 'yellow');
   }
 
   print('\n4. 阅读文档', 'cyan');
@@ -601,7 +683,10 @@ async function main() {
     }
 
     // 6. 生成配置文件
-    generateClaudeConfig(config);
+    generateManagedConfig(config);
+    if (config.agentMode === 'claude' || config.agentMode === 'both') {
+      generateClaudeConfig(config);
+    }
 
     // 7. 安装依赖
     const depsInstalled = await installDependencies();

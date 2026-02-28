@@ -5,8 +5,9 @@
 This repository uses a skills-first model. Custom slash commands have been
 migrated into skills.
 
-- Skill root: `.claude/skills/`
-- Skill format: `.claude/skills/<skill-name>/SKILL.md`
+- Skill source root: `06_Meta/skills/`
+- Compatibility links: `.claude/skills/` and `.agents/skills/`
+- Skill format: `06_Meta/skills/<skill-name>/SKILL.md`
 - Invocation style: keep existing slash names (for example:
   `/thinking-partner`, `/daily-review`, `/upgrade`)
 - Skill creation entry: `/create-skill` and `npm run create-skill`

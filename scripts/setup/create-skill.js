@@ -1,8 +1,25 @@
 const fs = require('fs');
 const path = require('path');
 const readline = require('readline');
+const { execSync } = require('child_process');
+const {
+  loadWorkspaceConfig,
+  resolveSkillsDir
+} = require('../utils/agent-config');
 
-const SKILLS_DIR = path.resolve(__dirname, '../../.claude/skills');
+const SKILLS_DIR = resolveSkillsDir({
+  cwd: path.resolve(__dirname, '../..'),
+  createIfMissing: true
+});
+
+function commandExists(command) {
+  try {
+    execSync(`which ${command}`, { stdio: 'ignore' });
+    return true;
+  } catch {
+    return false;
+  }
+}
 
 const rl = readline.createInterface({
   input: process.stdin,
@@ -94,7 +111,19 @@ User: /${normalizedName}
   fs.mkdirSync(skillDir, { recursive: true });
   fs.writeFileSync(filePath, content);
   console.log(`\n✅ Skill created successfully: ${filePath}`);
-  console.log(`\nTry it now: claude (then type /${normalizedName})`);
+
+  const { config } = loadWorkspaceConfig({ cwd: path.resolve(__dirname, '../..') });
+  const preferredMode = config.agent && config.agent.mode ? config.agent.mode : 'both';
+  const hasCodex = commandExists('codex');
+  const hasClaude = commandExists('claude');
+
+  if ((preferredMode === 'codex' || preferredMode === 'both') && hasCodex) {
+    console.log(`\nTry it now: codex (then type /${normalizedName})`);
+  } else if ((preferredMode === 'claude' || preferredMode === 'both') && hasClaude) {
+    console.log(`\nTry it now: claude (then type /${normalizedName})`);
+  } else {
+    console.log(`\nTry it now with your AI CLI (then type /${normalizedName})`);
+  }
 
   rl.close();
 }
